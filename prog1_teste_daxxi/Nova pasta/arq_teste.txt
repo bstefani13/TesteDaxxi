@@ -1,0 +1,3 @@
+Adicionar apenas pastas vazias não aparece como alteração.
+
+Adicionar qualquer tipo de arquivo já aparece como alteração.
