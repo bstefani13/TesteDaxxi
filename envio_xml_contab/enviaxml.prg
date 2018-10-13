@@ -3,7 +3,7 @@ STATIC Thisform
 
 FUNCTION envioprgcontab
   Local hWin:= GetActiveWindow()
-  PRIVATE vDate1 := date() , vDate2 := date() , vEmail := cdpar000->ctb_email, vZip:= .F. //REATIVAR
+  PRIVATE vDate1 := date() , vDate2 := date() , vEmail := cdpar000->ctb_email, vZip:= .F. 
   PRIVATE oDlgEnviaXML, oDate1, oLabel1, oDate2, oLabel2, oButtonex1, oEmail, oLabel3 ;
         , oBrowse1EnviaXML, oButtonex2, oButtonex3, notas:= {}, oZip, oAnimation1
   //variaveis adicionadas
@@ -82,7 +82,7 @@ FUNCTION envioprgcontab
 		  , nRadiogroup_TipoDoc, oRadiogroup_TipoDoc, oRadiobutton_NFE, oRadiobutton_NFCE ;	//adicionadas
         , oRadiobutton_SAT, oRadiobutton_CTE, oRadiobutton_MDFE
         
-   SetTransparent( hWin, 255 ) REATIVAR
+   SetTransparent( hWin, 255 ) 
    
 RETURN NIL
 
