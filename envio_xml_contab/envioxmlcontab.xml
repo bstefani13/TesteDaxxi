@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <part class="form">
   <style>
-    <property name="Geometry">{0,132,884,467}</property>
+    <property name="Geometry">{186,162,888,586}</property>
     <property name="Name">[]</property>
-    <property name="Caption">
-[Notas fiscais eletrônicas - Envio de XML p/ contabilidade]    </property>
+    <property name="Caption">[Envio de arquivos fiscais]</property>
     <property name="AlwaysOnTop">.F.</property>
     <property name="AutoCenter">.T.</property>
     <property name="Font">
       <font name="Tahoma" width="0" height="-11" weight="400"/>
     </property>
     <property name="Icon">[100]</property>
+    <property name="Stretch">[1 - Isometric]</property>
     <property name="FormType">[dlgModal]</property>
     <property name="Modal">.T.</property>
     <property name="FromStyle">[Popup]</property>
@@ -48,7 +48,7 @@
   </part>
   <part class="datepicker" inclass="">
     <style>
-      <property name="Geometry">{7,21,98,32}</property>
+      <property name="Geometry">{7,137,98,32}</property>
       <property name="Name">[oDate1]</property>
       <property name="varName">[vDate1]</property>
       <property name="TabIndex">1</property>
@@ -56,7 +56,7 @@
   </part>
   <part class="label" inclass="">
     <style>
-      <property name="Geometry">{7,5,55,21}</property>
+      <property name="Geometry">{7,121,55,21}</property>
       <property name="Name">[oLabel1]</property>
       <property name="Caption">[Data inicial]</property>
       <property name="Transparent">.T.</property>
@@ -65,7 +65,7 @@
   </part>
   <part class="datepicker" inclass="">
     <style>
-      <property name="Geometry">{123,21,98,32}</property>
+      <property name="Geometry">{123,137,98,32}</property>
       <property name="Name">[oDate2]</property>
       <property name="varName">[vDate2]</property>
       <property name="TabIndex">3</property>
@@ -73,7 +73,7 @@
   </part>
   <part class="label" inclass="">
     <style>
-      <property name="Geometry">{123,5,46,21}</property>
+      <property name="Geometry">{123,121,46,21}</property>
       <property name="Name">[oLabel2]</property>
       <property name="Caption">[Data final]</property>
       <property name="Transparent">.T.</property>
@@ -82,7 +82,7 @@
   </part>
   <part class="buttonex" inclass="">
     <style>
-      <property name="Geometry">{228,21,44,32}</property>
+      <property name="Geometry">{228,137,44,32}</property>
       <property name="Name">[oButtonex1]</property>
       <property name="Caption">[]</property>
       <property name="Bitmap">[..\alamino\res\eanok.bmp]</property>
@@ -92,7 +92,7 @@
   </part>
   <part class="editbox" inclass="">
     <style>
-      <property name="Geometry">{303,21,377,32}</property>
+      <property name="Geometry">{303,137,377,32}</property>
       <property name="Name">[oEmail]</property>
       <property name="varName">[vEmail]</property>
       <property name="nMaxLength">60</property>
@@ -101,7 +101,7 @@
   </part>
   <part class="label" inclass="">
     <style>
-      <property name="Geometry">{303,5,64,21}</property>
+      <property name="Geometry">{303,121,64,21}</property>
       <property name="Name">[oLabel3]</property>
       <property name="Caption">[Email contab.]</property>
       <property name="Transparent">.T.</property>
@@ -110,7 +110,7 @@
   </part>
   <part class="browse" inclass="">
     <style>
-      <property name="Geometry">{8,61,869,354}</property>
+      <property name="Geometry">{8,177,869,354}</property>
       <property name="Name">[oBrowse1]</property>
       <property name="BrwType">[array]</property>
       <property name="ColumnsCount">6</property>
@@ -121,7 +121,7 @@
     </style>
     <part class="column">
       <style>
-        <property name="Geometry">{10,62,77,22}</property>
+        <property name="Geometry">{10,178,68,20}</property>
         <property name="Name">[oColumn1]</property>
         <property name="Heading">[Emissão]</property>
         <property name="JustifyHeader">[1-Center]</property>
@@ -133,7 +133,7 @@
     </part>
     <part class="column">
       <style>
-        <property name="Geometry">{87,62,70,22}</property>
+        <property name="Geometry">{78,178,73,20}</property>
         <property name="Name">[oColumn2]</property>
         <property name="Heading">[Número]</property>
         <property name="JustifyHeader">[1-Center]</property>
@@ -145,7 +145,7 @@
     </part>
     <part class="column">
       <style>
-        <property name="Geometry">{157,62,217,22}</property>
+        <property name="Geometry">{151,178,220,20}</property>
         <property name="Name">[oColumn3]</property>
         <property name="Heading">[Destinatário]</property>
         <property name="JustifyHeader">[1-Center]</property>
@@ -156,7 +156,7 @@
     </part>
     <part class="column">
       <style>
-        <property name="Geometry">{374,62,357,22}</property>
+        <property name="Geometry">{371,178,360,20}</property>
         <property name="Name">[oColumn4]</property>
         <property name="Heading">[XML]</property>
         <property name="JustifyHeader">[1-Center]</property>
@@ -171,7 +171,7 @@
     </part>
     <part class="column">
       <style>
-        <property name="Geometry">{731,62,77,22}</property>
+        <property name="Geometry">{731,178,80,20}</property>
         <property name="Name">[oColumn5]</property>
         <property name="Heading">[Enviado]</property>
         <property name="JustifyHeader">[1-Center]</property>
@@ -183,7 +183,7 @@
     </part>
     <part class="column">
       <style>
-        <property name="Geometry">{808,62,52,22}</property>
+        <property name="Geometry">{811,178,49,20}</property>
         <property name="Name">[oColumn6]</property>
         <property name="Heading">[Enviar]</property>
         <property name="JustifyHeader">[1-Center]</property>
@@ -197,7 +197,7 @@
   </part>
   <part class="buttonex" inclass="">
     <style>
-      <property name="Geometry">{756,426,121,32}</property>
+      <property name="Geometry">{756,542,121,32}</property>
       <property name="Name">[oButtonex2]</property>
       <property name="Caption">[Envia para contab.]</property>
       <property name="TabIndex">9</property>
@@ -205,7 +205,7 @@
   </part>
   <part class="buttonex" inclass="">
     <style>
-      <property name="Geometry">{628,426,121,32}</property>
+      <property name="Geometry">{628,542,121,32}</property>
       <property name="Name">[oButtonex3]</property>
       <property name="Caption">[Marcar todas]</property>
       <property name="TabIndex">10</property>
@@ -213,7 +213,7 @@
   </part>
   <part class="checkbox" inclass="">
     <style>
-      <property name="Geometry">{723,31,110,22}</property>
+      <property name="Geometry">{723,147,110,22}</property>
       <property name="Name">[oZip]</property>
       <property name="varName">[vZip]</property>
       <property name="Caption">[Compactar]</property>
@@ -221,5 +221,55 @@
 [Reúne todos os arquivos num arquivo compactado, formato ZIP.]      </property>
       <property name="TabIndex">11</property>
     </style>
+  </part>
+  <part class="radiogroup" inclass="">
+    <style>
+      <property name="Geometry">{7,10,280,105}</property>
+      <property name="Name">[oRadiogroup_TipoDoc]</property>
+      <property name="varName">[nRadiogroup_TipoDoc]</property>
+      <property name="Caption">
+[Selecione o tipo de documento fiscal a ser enviado]      </property>
+      <property name="TabIndex">13</property>
+    </style>
+    <part class="radiobutton">
+      <style>
+        <property name="Geometry">{30,25,90,22}</property>
+        <property name="Name">[oRadiobutton_NFE]</property>
+        <property name="Caption">[NFe]</property>
+        <property name="TabIndex">14</property>
+      </style>
+    </part>
+    <part class="radiobutton">
+      <style>
+        <property name="Geometry">{30,55,90,22}</property>
+        <property name="Name">[oRadiobutton_NFCE]</property>
+        <property name="Caption">[NFCe]</property>
+        <property name="TabIndex">14</property>
+      </style>
+    </part>
+    <part class="radiobutton">
+      <style>
+        <property name="Geometry">{30,85,90,22}</property>
+        <property name="Name">[oRadiobutton_SAT]</property>
+        <property name="Caption">[SAT]</property>
+        <property name="TabIndex">14</property>
+      </style>
+    </part>
+    <part class="radiobutton">
+      <style>
+        <property name="Geometry">{180,24,90,22}</property>
+        <property name="Name">[oRadiobutton_CTE]</property>
+        <property name="Caption">[CTe]</property>
+        <property name="TabIndex">14</property>
+      </style>
+    </part>
+    <part class="radiobutton">
+      <style>
+        <property name="Geometry">{180,55,90,22}</property>
+        <property name="Name">[oRadiobutton_MDFE]</property>
+        <property name="Caption">[MDFe]</property>
+        <property name="TabIndex">14</property>
+      </style>
+    </part>
   </part>
 </part>
