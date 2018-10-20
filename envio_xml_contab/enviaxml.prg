@@ -47,6 +47,7 @@ IF lAutoEnvio		//Rotina de envio automatico
 	 
 	if Coleta_Envia() //caso de tudo certo
 		cdpar000->xml_auto_envio := vDataAtual
+		Commit
 		MsgInfo('Os Arquivos Fiscais foram enviados, para o email ' + Alltrim(vEmail) + ', com sucesso.','Aviso do Sistema')
 	else		
 		if !Empty(cMsgFalha)
