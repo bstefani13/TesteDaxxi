@@ -3,7 +3,8 @@ STATIC Thisform
 
 FUNCTION envioprgcontab(lOpt)
   Local hWin:= GetActiveWindow();
-		  , vDataUltimoEnvio, vDataAtual		//adicionadas
+		  , vDataUltimoEnvio, vDataAtual ;			//adicionadas
+		  , oSql:= SR_GetConnection(), aRes := {}	//adicionadas
 
   PRIVATE vDate1 := date() , vDate2 := date() , vEmail := cdpar000->ctb_email, vZip:= .F. ;
   			 , dDataInicialProximoEnvio, dDataFinalProximoEnvio, lAutoEnvio		//adicionadas
@@ -22,7 +23,17 @@ IF lAutoEnvio		//Rotina de envio automatico
 	vDataAtual := DtoS( Date() )
 	
 	if Empty(vDataUltimoEnvio)
-		vDataUltimoEnvio := DtoS( ( StoD(vDataAtual) - Val( Right(vDataAtual,2) ) ) )
+		//adiconada verificacao extra via query para confirmar o valor da variavel xml_auto_envio
+		oSql:Exec("select xml_auto_envio from cdpar000",.t.,.t.,@aRes)		
+		if ( Len(aRes) <= 0 )	//não conseguiu ler o conteudo da variavel xml_auto_envio
+			MsgInfo('Não foi possível localizar a chave para envio automático dos arquivos fiscais.' + Chr(10) + Chr(10) + 'Reinicie o aplicativo, e caso o problema persista, favor entrar em contato com o suporte.' )
+			Return NIL
+		endif
+		if !Empty(aRes[1,1])
+			vDataUltimoEnvio := aRes[1,1]
+		else
+			vDataUltimoEnvio := DtoS( ( StoD(vDataAtual) - Val( Right(vDataAtual,2) ) ) )
+		endif
 	endif
 	
 	//Verificar se deve ser executada
@@ -48,6 +59,7 @@ IF lAutoEnvio		//Rotina de envio automatico
 	if Coleta_Envia() //caso de tudo certo
 		cdpar000->xml_auto_envio := vDataAtual
 		Commit
+		oSql:Commit()
 		MsgInfo('Os Arquivos Fiscais foram enviados, para o email ' + Alltrim(vEmail) + ', com sucesso.','Aviso do Sistema')
 	else		
 		if !Empty(cMsgFalha)
@@ -67,13 +79,12 @@ ELSE	//Rotina manual, como já funcionava
   Private oRadiogroup_TipoDoc, oRadiobutton_NFE, oRadiobutton_NFCE ;
         , oRadiobutton_SAT, oRadiobutton_CTE, oRadiobutton_MDFE
 
-
   INIT DIALOG oDlgEnviaXML TITLE "Envio de arquivos fiscais" ; //"Notas fiscais eletrônicas - Envio de XML p/ contabilidade" ;  //Titulo alterado
     ICON HIcon():AddResource(100)  ;
     AT 0, 0 SIZE 884,590 ;  //AT 0, 0 SIZE 884,467 ; (valor anterior)
     FONT HFont():Add( 'Tahoma',0,-11,400,,,) CLIPPER  NOEXIT  ;
-    STYLE WS_POPUP+WS_CAPTION+WS_SYSMENU+DS_CENTER ;  
-    ON INIT {|| SetTransparent( hWin, 200 ) } 
+    STYLE WS_POPUP+WS_CAPTION+WS_SYSMENU+DS_CENTER ;
+    ON INIT {|| SetTransparent( hWin, 200 ) }
     Thisform:= oDlgEnviaXML
 
 	//Adicionado grupo para escolha do tipo de doc fiscal a ser enviado
@@ -177,7 +188,7 @@ Local oSql:= SR_GetConnection(), cSql, n:= {}, hArqNFe ;
     , i, path_exe := Left(HB_ArgV(0),Rat('\',HB_ArgV(0))), hArqAux ;	//adicionadas
     , path_sat_aut, path_sat_tra, path_sat_can, path_sat_can_tra ;
 	 , path_nfce_aut, path_nfce_tra, path_mdfe_aut, path_mdfe_can ;
-	 , path_cte_cri, lFalta_cte := .F.
+	 , path_cte_cri, lFalta_cte := .F.		//, aLista_Cte :={} removida
 notas = {}
 //Bloco adicionado para identificar caminho das pastas
 Do Case
@@ -228,7 +239,7 @@ for a:= 1 to len(notas)
 next
 */
 //Adicionada verificacao do tipo de doc selecionado
-Do Case	
+Do Case
 	Case nRadiogroup_TipoDoc == 1		//NFe    
 		cSql:= "select distinct cab_dt,cabnfe,cabnom,'',xmlctbdt,false,cabkey,sr_recno,cabarqxml from cdcab000 where cab_dt between "
 		cSql += sr_cdbvalue(vDate1) + " and " + sr_cdbvalue(vDate2)
@@ -236,7 +247,7 @@ Do Case
 		oSql:Exec(cSql,.t.,.t.,@notas)
 		
 		for a:= 1 to len(notas)
-    		notas[a,6] := lAutoEnvio //.f. valor anterior
+    		notas[a,6] := lAutoEnvio //.f.
 		    if file(patth + notas[a,7] + '-nfe.xml') // arquivo existe na pasta
 		       notas[a,4] := patth + notas[a,7] + '-nfe.xml'
 		    else                                     // arquivo não existe na pasta e será criado com base no BD
@@ -255,7 +266,7 @@ Do Case
 
 		if len(notas) > 0
 			for i := 1 to len(notas)
-				notas[i,6] := lAutoEnvio //.f. valor anterior
+				notas[i,6] := lAutoEnvio //.f.
 				//verifica aqui se houve o cancelamento do cupom, se o arquivo existe e cria se for o caso
 				if File( path_nfce_tra + notas[i,7] + '-NFCe.xml' )
 					notas[i,4] := path_nfce_tra + notas[i,7] + '-NFCe.xml'
@@ -285,7 +296,7 @@ Do Case
 
 		if len(notas) > 0
 			for i := 1 to len(notas)
-				notas[i,6] := lAutoEnvio //.f. valor anterior
+				notas[i,6] := lAutoEnvio //.f.
 				//verifica primeiro em transmitidos
 				if File( path_sat_tra + notas[i,7] + '.xml' )
 					notas[i,4] := path_sat_tra + notas[i,7] + '.xml'
@@ -322,7 +333,7 @@ Do Case
 		if len(notas) > 0
 			for i := 1 to len(notas)
 				notas[i,2] := Val( CStr(notas[i,2]) )
-				notas[i,6] := lAutoEnvio //.f. valor anterior
+				notas[i,6] := lAutoEnvio //.f.
 				if File( path_cte_cri + notas[i,7] + '-cte.xml' )
 					notas[i,4] := path_cte_cri + notas[i,7] + '-cte.xml'
 				else
@@ -331,6 +342,28 @@ Do Case
 			next
 		endif
 		
+		/* Bloco substituido por consulta na tabela cdcte000 (pode ser excluido)
+		aLista_Cte := Directory( path_cte_cri + "*-cte.xml" )
+		
+		if len(aLista_Cte) > 0
+			For i := 1 to len(aLista_Cte)
+				if aLista_Cte[i,3] >= vDate1 .AND. aLista_Cte[i,3] <= vDate2
+					aadd(notas, { aLista_Cte[i,3]								  , ;		//data
+									  Val( Substr( aLista_Cte[i,1], 35, 9 ) ), ;		//numero cte
+									  ''												  , ;		//destinatario
+									  path_cte_cri + aLista_Cte[i,1]			  , ;		//caminho do arquivo - path_cte_cri
+									  StoD('        ')							  , ;		//enviado data
+									  .F.												  , ;		//marcado t f
+									  Left( aLista_Cte[i,1], 44 )				  , ;		//cte key
+									} )
+				endif
+			Next
+			if len(notas) > 0
+				aSort(notas,,, {|x,y| x[2] < y[2]})
+			endif
+		endif
+		*/
+
 	Case nRadiogroup_TipoDoc == 5		//MDFe
 									//	1			2		3	4		5		6			7			8		9
 		cSql:= "select distinct mdfdat,mdfnum,'','',xmlctbdt,false,mdfkey,sr_recno,mdfxml from cdmdf000 where mdfdat between "
@@ -341,7 +374,7 @@ Do Case
 		if len(notas) > 0
 			For i := 1 to len(notas)
 				notas[i,2] := Val( CStr(notas[i,2]) )
-				notas[i,6] := lAutoEnvio //.f. valor anterior
+				notas[i,6] := lAutoEnvio //.f.
 				//verifica se arquivo existe na pasta autorizados (cancelados serão incluidos na hora do envio como nfe)
 				if file(path_mdfe_aut + notas[i,7] + '-mdf.xml') // arquivo existe na pasta
 					notas[i,4] := path_mdfe_aut + notas[i,7] + '-mdf.xml'
@@ -522,6 +555,7 @@ if lAutoEnvio
 		Return .F.
 	endif
 	xmls := aArqZip
+	
 else
 	//adicionada verificação do array xmls
 	if len(xmls) <= 0
@@ -571,88 +605,89 @@ if config_mail(xmls,cSubject,aQuem,cMsg,cServerIp,cFrom,cUser,cPass,vPORTSMTP,aC
 	*/
 	
 	//Bloco adicionado	
-	if lAutoEnvio	//modo de auto envio
-		Return .F. 
+ if lAutoEnvio	//modo de auto envio
+	Return .F. 
 		
-	else	//modo manual
+ else	//modo manual
 	
-		Do Case	//Aqui Acrescentar verificacao do tipo de doc para efetuar o update
-			Case nRadiogroup_TipoDoc == 1		//NFe
-				for b:= 1 to len(notas)
-					if notas[b,6] .AND. File( notas[b,4] )
-						cSql:= "update cdcab000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
-						cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
-						oSql:Execute(cSql,.t.) 
-						oBrowse1EnviaXML:aArray[b,5] = date()
-						oBrowse1EnviaXML:RefreshLine(.t.)
-					endif
-				next    
-				oSql:Commit()
-      	
-			Case nRadiogroup_TipoDoc == 2		//NFCe
-				for b:= 1 to len(notas)
-					if notas[b,6] .AND. File( notas[b,4] )
-						cSql:= "update cdusu000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
-						cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
-						oSql:Execute(cSql,.t.) 
-						oBrowse1EnviaXML:aArray[b,5] = date()
-						oBrowse1EnviaXML:RefreshLine(.t.)
-					endif
-				next    
-				oSql:Commit()
+	Do Case	
+		Case nRadiogroup_TipoDoc == 1		//NFe
+			for b:= 1 to len(notas)
+				if notas[b,6] .AND. File( notas[b,4] )
+					cSql:= "update cdcab000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
+					cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
+					oSql:Execute(cSql,.t.) 
+					oBrowse1EnviaXML:aArray[b,5] = date()
+					oBrowse1EnviaXML:RefreshLine(.t.)
+				endif
+			next    
+			oSql:Commit()
 
-			Case nRadiogroup_TipoDoc == 3		//SAT
-				for b:= 1 to len(notas)
-					if notas[b,6] .AND. File( notas[b,4] )
-						cSql:= "update cdusu000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
-						cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
-						oSql:Execute(cSql,.t.) 
-						oBrowse1EnviaXML:aArray[b,5] = date()
-						oBrowse1EnviaXML:RefreshLine(.t.)
-					endif
-				next    
-				oSql:Commit()
+		Case nRadiogroup_TipoDoc == 2		//NFCe
+			for b:= 1 to len(notas)
+				if notas[b,6] .AND. File( notas[b,4] )
+					cSql:= "update cdusu000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
+					cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
+					oSql:Execute(cSql,.t.) 
+					oBrowse1EnviaXML:aArray[b,5] = date()
+					oBrowse1EnviaXML:RefreshLine(.t.)
+				endif
+			next    
+			oSql:Commit()
 
-			Case nRadiogroup_TipoDoc == 4		//CTe
-				for b:= 1 to len(notas)
-					if notas[b,6] .AND. File( notas[b,4] )
-						cSql:= "update cdcte000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
-						cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
-						oSql:Execute(cSql,.t.) 
-						oBrowse1EnviaXML:aArray[b,5] = date()
-						oBrowse1EnviaXML:RefreshLine(.t.)
-					endif
-				next    
-				oSql:Commit()
+		Case nRadiogroup_TipoDoc == 3		//SAT
+			for b:= 1 to len(notas)
+				if notas[b,6] .AND. File( notas[b,4] )
+					cSql:= "update cdusu000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
+					cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
+					oSql:Execute(cSql,.t.) 
+					oBrowse1EnviaXML:aArray[b,5] = date()
+					oBrowse1EnviaXML:RefreshLine(.t.)
+				endif
+			next    
+			oSql:Commit()
 
-				/* Bloco substituido por update no cdcte000 (pode ser excluido)
-				for b:= 1 to len(notas)
-					if notas[b,6]
-						oBrowse1EnviaXML:aArray[b,5] = date()
-						oBrowse1EnviaXML:RefreshLine(.t.)
-					endif
-				next
-				*/
+		Case nRadiogroup_TipoDoc == 4		//CTe
+			for b:= 1 to len(notas)
+				if notas[b,6] .AND. File( notas[b,4] )
+					cSql:= "update cdcte000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
+					cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
+					oSql:Execute(cSql,.t.) 
+					oBrowse1EnviaXML:aArray[b,5] = date()
+					oBrowse1EnviaXML:RefreshLine(.t.)
+				endif
+			next    
+			oSql:Commit()
 
-			Case nRadiogroup_TipoDoc == 5		//MDFe
-				for b:= 1 to len(notas)
-					if notas[b,6] .AND. File( notas[b,4] )
-						cSql:= "update cdmdf000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
-						cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
-						oSql:Execute(cSql,.t.) 
-						oBrowse1EnviaXML:aArray[b,5] = date()
-						oBrowse1EnviaXML:RefreshLine(.t.)
-					endif
-				next    
-				oSql:Commit()
+			/* Bloco substituido por update no cdcte000 (pode ser excluido)
+			for b:= 1 to len(notas)
+				if notas[b,6]
+					oBrowse1EnviaXML:aArray[b,5] = date()
+					oBrowse1EnviaXML:RefreshLine(.t.)
+				endif
+			next
+			*/
 
-		EndCase
+		Case nRadiogroup_TipoDoc == 5		//MDFe
+			for b:= 1 to len(notas)
+				if notas[b,6] .AND. File( notas[b,4] )
+					cSql:= "update cdmdf000 set xmlctbdt="+sr_cdbvalue(date())+",xmlctbhr="+sr_cdbvalue(time())
+					cSql = cSql + " where sr_recno="+sr_cdbvalue(notas[b,8])
+					oSql:Execute(cSql,.t.) 
+					oBrowse1EnviaXML:aArray[b,5] = date()
+					oBrowse1EnviaXML:RefreshLine(.t.)
+				endif
+			next    
+			oSql:Commit()
+
+	EndCase
 	
-	endif
+ endif
 
 else	//adicionada verificacao de auto envio
  
  if lAutoEnvio
+ 	Fim_Run()
  	cMsgFalha := 'Ocorreu uma falha durante o envio do email.' + Chr(10) + Chr(10) + 'Verifique a configuração do email na opção Ferramentas->Email - Configuração' + Chr(10) + Chr(10) + 'Em caso de dúvidas, favor entrar em contato com o suporte.'
  	Return .T. //falhou
  endif
@@ -668,14 +703,15 @@ Static Function Coleta_Envia()
 	Local i, b, lRet := .F., nTipo, lFalha := .F., aTodasNotas := {} ;
 			, cSql, oSql:= SR_GetConnection();
 			
-	//consulta se existem arquivos a serem enviados
+	//Adicionada mensagem de envio para acompanhamento do processo
+	msgrun('Verificando e Coletando arquivos fiscais, por favor aguarde...')
+
+	//consultar se existem arquivos a serem enviados
 	For nTipo := 1 to 5
 	
 		nRadiogroup_TipoDoc := nTipo
 		 
 		lFalha := Query_Xmls()
-		
-		mostra(iif(nTipo==1,'NFe',iif(nTipo==2,'NFCe',iif(nTipo==3,'SAT',iif(nTipo==4,'CTe','MDFe')))),len(notas))
 		
 		if lFalha	//não localizou algum dos arquivos CTe
 			aTodasNotas := {}
@@ -710,6 +746,9 @@ Static Function Coleta_Envia()
 	
 	if !lFalha .AND. Len(aTodasNotas) > 0
 	
+		*******************************************************************************
+		HW_ATUALIZA_DIALOGO('Enviando arquivos fiscais por email, por favor aguarde...')
+
 		nEtapaEnvio := 6
 	
 		lFalha := EnviaParaContab()
@@ -718,6 +757,9 @@ Static Function Coleta_Envia()
 			lRet := .T.
 			
 			//realiza o update dos campos xmlctbdt e xmlctbhr dos arquivos fiscais enviados
+			*******************************************************************************
+			HW_ATUALIZA_DIALOGO('Atualizando datas de envio dos arquivos fiscais, por favor aguarde...')
+			
 			For i := 1 to Len(aTodasNotas)
 
 				Do Case	//Aqui Acrescentar verificacao do tipo de doc para efetuar o update
@@ -784,17 +826,20 @@ Static Function Coleta_Envia()
 			
 	endif
 	
+ 	Fim_Run()
+
 Return lRet
+
 
 
 //Funcao adicionada para recortar ano e mes da chave do doc fiscal
 Static Function rAnoMes(cTxt,nPos)
 Return Substr(cTxt,nPos,4)
 
-
 *Static Function Caminho_Exe()	//REMOVER
 *msginfo(Substr( HB_ArgV(0), 1, ( Rat('\',HB_ArgV(0)) - 1 ) ))
 *Return Substr( HB_ArgV(0), 1, ( Rat('\',HB_ArgV(0)) - 1 ) ) //retornar o caminho do executavel sem a barra
 
 *Static Function config_mail() //REMOVER
+*MilliSec(2500)
 *Return .T. //procede a configuracao e envio do email (retorna como tendo funcionado)
