@@ -25,6 +25,7 @@ IF lAutoEnvio		//Rotina de envio automatico
 	if Empty(vDataUltimoEnvio)
 		//adiconada verificacao extra via query para confirmar o valor da variavel xml_auto_envio
 		oSql:Exec("select xml_auto_envio from cdpar000",.t.,.t.,@aRes)		
+		
 		if ( Len(aRes) <= 0 )	//não conseguiu ler o conteudo da variavel xml_auto_envio
 			MsgInfo('Não foi possível localizar a chave para envio automático dos arquivos fiscais.' + Chr(10) + Chr(10) + 'Reinicie o aplicativo, e caso o problema persista, favor entrar em contato com o suporte.' )
 			Return NIL
@@ -56,12 +57,22 @@ IF lAutoEnvio		//Rotina de envio automatico
 	vDate1 := dDataInicialProximoEnvio
 	vDate2 := dDataFinalProximoEnvio
 	 
+	*** grava data de envio para que outros terminais não façam o envio
+	cdpar000->xml_auto_envio := vDataAtual
+	Commit
+	oSql:Commit()
+
 	if Coleta_Envia() //caso de tudo certo
-		cdpar000->xml_auto_envio := vDataAtual
-		Commit
-		oSql:Commit()
-		MsgInfo('Os Arquivos Fiscais foram enviados, para o email ' + Alltrim(vEmail) + ', com sucesso.','Aviso do Sistema')
+		//cdpar000->xml_auto_envio := vDataAtual
+		//Commit
+		//oSql:Commit()
+		//MsgInfo('Os Arquivos Fiscais foram enviados, para o email ' + Alltrim(vEmail) + ', com sucesso.','Aviso do Sistema')
 	else		
+	
+		*** grava data de envio anterior
+		cdpar000->xml_auto_envio := vDataUltimoEnvio
+		cdpar000->(dbCommit())
+		
 		if !Empty(cMsgFalha)
 			MsgInfo(cMsgFalha,'Aviso do Sistema')
 		endif
@@ -221,6 +232,7 @@ Do Case
 		path_mdfe_aut :=  path_exe + 'mdfe\autorizados\'
 
 EndCase
+
 
 /*	bloco movido para o case abaixo (pode ser excluido)
 cSql:= "select distinct cab_dt,cabnfe,cabnom,'',xmlctbdt,false,cabkey,sr_recno,cabarqxml from cdcab000 where cab_dt between "
@@ -404,7 +416,7 @@ else
 endif
 
 
-Static Function enviaparacontab                   //Aqui verificar e alterar caminho de acordo com tipo de doc
+Static Function enviaparacontab                   
 /* Alterado
 Local a, vai:= .f., xmls:= {}, b, patth:= curdrive()+':\'+curdir()+'\nfe\criadas\'; 
     , pattz:= curdrive()+':\'+curdir()+'\nfe\canceladas\', cZip:= '', cSql, oSql:= SR_GetConnection()
@@ -737,7 +749,7 @@ Static Function Coleta_Envia()
 	
 	if Len(aTodasNotas) > 0
 		if !Empty(vEmail)
-			MsgInfo('Existem arquivos fiscais prontos para enviar ao email do contabilista.' + Chr(10) + Chr(10) + 'O sistema irá realizar o envio para o email ' + Alltrim(vEmail),'Aviso do Sistema')
+			//MsgInfo('Existem arquivos fiscais prontos para enviar ao email do contabilista.' + Chr(10) + Chr(10) + 'O sistema irá realizar o envio para o email ' + Alltrim(vEmail),'Aviso do Sistema')
 		else
 			cMsgFalha := 'Existem arquivos fiscais prontos para envio, mas o email do contabilista não foi cadastrado.' + Chr(10) + Chr(10) + 'Efetue o cadastro do email do contabilista e reinicie o aplicativo.' + Chr(10) + Chr(10) + 'Em caso de dúvidas, favor entrar em contato com o suporte.'
 			lFalha := .T.	//sem email para enviar
@@ -762,7 +774,7 @@ Static Function Coleta_Envia()
 			
 			For i := 1 to Len(aTodasNotas)
 
-				Do Case	//Aqui Acrescentar verificacao do tipo de doc para efetuar o update
+				Do Case	
 					Case aTodasNotas[i,2] == 1		//NFe
 						notas := aTodasNotas[i,1]
 						for b:= 1 to len(notas)
@@ -841,5 +853,5 @@ Return Substr(cTxt,nPos,4)
 *Return Substr( HB_ArgV(0), 1, ( Rat('\',HB_ArgV(0)) - 1 ) ) //retornar o caminho do executavel sem a barra
 
 *Static Function config_mail() //REMOVER
-*MilliSec(2500)
+*	MilliSec(2500)
 *Return .T. //procede a configuracao e envio do email (retorna como tendo funcionado)
